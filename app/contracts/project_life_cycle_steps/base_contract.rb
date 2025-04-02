@@ -43,9 +43,6 @@ module ProjectLifeCycleSteps
       # Filter out steps with missing dates before proceeding with comparison
       filtered_steps = model.available_phases.select(&:start_date)
 
-      # Only proceed with comparisons if there are at least 2 valid steps
-      return if filtered_steps.size < 2
-
       # Compare consecutive steps in pairs
       filtered_steps.each_cons(2) do |previous_step, current_step|
         if has_invalid_dates?(previous_step, current_step)
