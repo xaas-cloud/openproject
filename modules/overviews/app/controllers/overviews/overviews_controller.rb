@@ -87,7 +87,7 @@ module ::Overviews
     end
 
     def project_life_cycles_form
-      service_call = ::ProjectLifeCycleSteps::PreviewAttributesService
+      service_call = ::ProjectLifeCycleSteps::SetAttributesService
                 .new(user: current_user,
                      model: @project,
                      contract_class: ProjectLifeCycleSteps::UpdateContract)
