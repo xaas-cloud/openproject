@@ -28,12 +28,12 @@
 
 module ProjectLifeCycleSteps
   class BaseContract < ::ModelContract
-    validate :select_custom_fields_permission
+    validate :edit_project_phases_permission
     validate :consecutive_steps_have_increasing_dates
 
     def valid?(context = :saving_phases) = super
 
-    def select_custom_fields_permission
+    def edit_project_phases_permission
       return if user.allowed_in_project?(:edit_project_phases, model)
 
       errors.add :base, :error_unauthorized
