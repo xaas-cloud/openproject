@@ -41,11 +41,11 @@ module ProjectLifeCycleSteps
 
     def consecutive_steps_have_increasing_dates
       # Filter out steps with missing dates before proceeding with comparison
-      filtered_steps = model.available_phases.select(&:start_date)
+      filtered_steps = model.available_phases.select(&:range_set?)
 
       # Compare consecutive steps in pairs
       filtered_steps.each_cons(2) do |previous_step, current_step|
-        if has_invalid_dates?(previous_step, current_step)
+        unless valid_dates?(previous_step, current_step)
           error = current_step.errors.add(:date_range, :non_continuous_dates)
           unless model.errors.include?(:"available_phases.date_range")
             model.errors.import(error, attribute: :"available_phases.date_range")
@@ -56,16 +56,8 @@ module ProjectLifeCycleSteps
 
     private
 
-    def start_date_for(step)
-      step.start_date
-    end
-
-    def finish_date_for(step)
-      step.finish_date || step.start_date # Use the start_date as fallback for single date stages
-    end
-
-    def has_invalid_dates?(previous_step, current_step)
-      start_date_for(current_step) <= finish_date_for(previous_step)
+    def valid_dates?(previous_step, current_step)
+      current_step.start_date > previous_step.finish_date
     end
   end
 end
