@@ -28,5 +28,25 @@
 
 module ProjectLifeCycleSteps
   class UpdateContract < BaseContract
+    validate :consecutive_steps_have_increasing_dates
+
+    alias_method :project, :model
+
+    def valid?(context = :saving_phases) = super
+
+    def consecutive_steps_have_increasing_dates
+      # Filter out steps with missing dates before proceeding with comparison
+      filtered_steps = model.available_phases.select(&:range_set?)
+
+      # Compare consecutive steps in pairs
+      filtered_steps.each_cons(2) do |previous_step, current_step|
+        unless valid_dates?(previous_step, current_step)
+          error = current_step.errors.add(:date_range, :non_continuous_dates)
+          unless model.errors.include?(:"available_phases.date_range")
+            model.errors.import(error, attribute: :"available_phases.date_range")
+          end
+        end
+      end
+    end
   end
 end
