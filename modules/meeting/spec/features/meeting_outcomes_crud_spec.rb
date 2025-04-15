@@ -30,7 +30,7 @@
 
 require "spec_helper"
 
-require_relative "../../../support/pages/meetings/show"
+require_relative "../support/pages/meetings/show"
 
 RSpec.describe "Meeting Outcomes CRUD", :js do
   shared_let(:project) { create(:project, enabled_module_names: %w[meetings]) }

@@ -63,7 +63,7 @@ module MeetingAgendaItems
       @meeting_agenda_item.editable? &&
         @meeting.in_progress? &&
         !@meeting_agenda_item.outcomes.exists? &&
-        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || @meeting_agenda_item.in_backlog?)
+        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || !@meeting_agenda_item.in_backlog?)
     end
 
     def first?

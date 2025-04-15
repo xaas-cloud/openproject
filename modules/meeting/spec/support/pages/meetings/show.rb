@@ -311,6 +311,73 @@ module Pages::Meetings
       expect(page).to have_no_css("op-meeting-outcome--button")
     end
 
+    def expect_backlog(collapsed:)
+      expect(page).to have_css(".CollapsibleHeader", text: I18n.t("label_agenda_backlog"))
+
+      if collapsed
+        expect(page).to have_css(".CollapsibleHeader.CollapsibleHeader--collapsed")
+        expect(page).to have_no_text(I18n.t("text_agenda_backlog"))
+      else
+        expect(page).to have_no_css(".CollapsibleHeader.CollapsibleHeader--collapsed")
+        expect(page).to have_text(I18n.t("text_agenda_backlog"))
+      end
+    end
+
+    def expect_backlog_count(count)
+      within("#meeting-sections-backlogs-container-component") do
+        expect(page).to have_css(".Counter", text: count)
+      end
+    end
+
+    def expect_no_backlog
+      expect(page).to have_no_css(".CollapsibleHeader")
+    end
+
+    def expect_empty_backlog
+      within_backlog do
+        expect(page).to have_text("Drag items here or create a new one")
+        expect(page).to have_button("Add")
+      end
+    end
+
+    def add_agenda_item_to_backlog(type: MeetingAgendaItem, &)
+      select_backlog_action(type.model_name.human)
+
+      within("#meeting-sections-backlogs-container-component") do
+        in_agenda_form do
+          yield
+          click_on("Save")
+        end
+      end
+    end
+
+    def select_backlog_action(action)
+      retry_block do
+        click_on_backlog_menu
+        page.find(".Overlay")
+      end
+
+      page.within(".Overlay") do
+        click_on action
+      end
+    end
+
+    def click_on_backlog_menu
+      page.within("#meeting-sections-backlogs-header-component") do
+        page.find_test_selector("meeting-section-action-menu").click
+      end
+    end
+
+    def within_backlog(&)
+      page.within("#meeting-sections-backlogs-container-component", &)
+    end
+
+    def click_on_backlog
+      within_backlog do
+        page.find(".CollapsibleHeader").click
+      end
+    end
+
     def edit_agenda_item(item, &)
       select_action item, "Edit"
       expect_item_edit_form(item)
@@ -384,6 +451,18 @@ module Pages::Meetings
         click_on("Closed")
       end
       expect(page).to have_link("Reopen meeting")
+    end
+
+    def close_meeting_from_in_progress
+      page.within("#meetings-side-panel-state-component") do
+        click_on("Close meeting")
+      end
+    end
+
+    def start_meeting
+      page.within("#meetings-side-panel-state-component") do
+        click_on("Start meeting")
+      end
     end
 
     def reopen_meeting

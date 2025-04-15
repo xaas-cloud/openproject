@@ -48,7 +48,7 @@ module MeetingAgendaItems::Outcomes
     def render?
       @meeting.in_progress? &&
         User.current.allowed_in_project?(:create_meeting_minutes, @meeting.project) &&
-        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || @meeting_agenda_item.in_backlog?)
+        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || !@meeting_agenda_item.in_backlog?)
     end
   end
 end

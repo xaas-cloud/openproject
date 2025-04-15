@@ -47,7 +47,7 @@ module MeetingAgendaItems
     def edit_enabled?
       @meeting.in_progress? &&
         User.current.allowed_in_project?(:create_meeting_minutes, @meeting.project) &&
-        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || @agenda_item.in_backlog?)
+        (!OpenProject::FeatureDecisions.meeting_backlogs_active? || !@agenda_item.in_backlog?)
     end
 
     def edit_action_item(menu)

@@ -77,7 +77,7 @@ RSpec.describe MeetingOutcomes::CreateContract do
       it_behaves_like "contract is invalid", base: I18n.t(:text_outcome_not_editable_anymore)
     end
 
-    context "when :meeting_agenda_item is in a backlog" do
+    context "when :meeting_agenda_item is in a backlog", with_flag: { meeting_backlogs: true } do
       before do
         meeting.update_column(:state, :in_progress)
         meeting_agenda_item.meeting_section.update_column(:backlog, true)

@@ -126,6 +126,6 @@ class MeetingAgendaItem < ApplicationRecord
   end
 
   def in_backlog?
-    !meeting_section.backlog?
+    meeting_section.backlog?
   end
 end

@@ -41,7 +41,7 @@ class MeetingOutcomesController < ApplicationController
   def new
     update_all_via_turbo_stream
 
-    if @meeting.in_progress? && (!OpenProject::FeatureDecisions.meeting_backlogs_active? || @meeting_agenda_item.in_backlog?)
+    if @meeting.in_progress? && (!OpenProject::FeatureDecisions.meeting_backlogs_active? || !@meeting_agenda_item.in_backlog?)
       render_base_outcome_component_via_turbo_stream(meeting: @meeting, meeting_agenda_item: @meeting_agenda_item,
                                                      meeting_outcome: nil, edit: true)
     else
