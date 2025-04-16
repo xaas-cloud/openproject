@@ -195,8 +195,7 @@ module MeetingAgendaItems
                      content_arguments: { data: {
                        action: "click->keep-collapsed-state#interceptMoveTo",
                        href: drop_meeting_agenda_item_path(@meeting_agenda_item.meeting, @meeting_agenda_item, type: :to_backlog)
-                     }
-                     }) do |item|
+                     } }) do |item|
         item.with_leading_visual_icon(icon: "discussion-outdated")
       end
     end
@@ -207,8 +206,7 @@ module MeetingAgendaItems
                      content_arguments: { data: {
                        action: "click->keep-collapsed-state#interceptMoveTo",
                        href: drop_meeting_agenda_item_path(@meeting_agenda_item.meeting, @meeting_agenda_item, type: :to_current)
-                     }
-                     }) do |item|
+                     } }) do |item|
         item.with_leading_visual_icon(icon: "cross-reference")
       end
     end

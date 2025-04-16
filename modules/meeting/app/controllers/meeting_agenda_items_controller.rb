@@ -49,8 +49,11 @@ class MeetingAgendaItemsController < ApplicationController
     else
       if params[:meeting_section_id].present?
         meeting_section = MeetingSection.find_by(id: params[:meeting_section_id])
+        if meeting_section.backlog?
+          collapsed = false
+        end
       end
-      render_agenda_item_form_via_turbo_stream(meeting_section:, type: @agenda_item_type)
+      render_agenda_item_form_via_turbo_stream(meeting_section:, collapsed:, type: @agenda_item_type)
     end
 
     respond_with_turbo_streams
@@ -58,9 +61,12 @@ class MeetingAgendaItemsController < ApplicationController
 
   def cancel_new
     if params[:meeting_section_id].present?
-      meeting_section = @meeting.sections.find(params[:meeting_section_id])
+      meeting_section = MeetingSection.find_by(id: params[:meeting_section_id])
       if meeting_section.agenda_items.empty?
-        update_section_via_turbo_stream(form_hidden: true, meeting_section:)
+        if meeting_section.backlog?
+          collapsed = false
+        end
+        update_section_via_turbo_stream(form_hidden: true, meeting_section:, collapsed:)
       else
         update_new_button_via_turbo_stream(disabled: false, meeting_section:)
       end
@@ -88,9 +94,11 @@ class MeetingAgendaItemsController < ApplicationController
       reset_meeting_from_agenda_item
       # enable continue editing
       add_item_via_turbo_stream(clear_slate: false)
-      update_backlog_via_turbo_stream(collapsed: nil)
       update_header_component_via_turbo_stream
       update_sidebar_details_component_via_turbo_stream
+      if @meeting_agenda_item.meeting_section.backlog?
+        update_backlog_via_turbo_stream(collapsed: false)
+      end
     else
       # show errors
       update_new_component_via_turbo_stream(
@@ -139,7 +147,7 @@ class MeetingAgendaItemsController < ApplicationController
     respond_with_turbo_streams
   end
 
-  def destroy
+  def destroy # rubocop:disable Metrics/AbcSize
     section = @meeting_agenda_item.meeting_section
 
     call = ::MeetingAgendaItems::DeleteService
@@ -152,6 +160,9 @@ class MeetingAgendaItemsController < ApplicationController
       update_header_component_via_turbo_stream
       update_section_header_via_turbo_stream(meeting_section: section) if section&.reload.present?
       update_sidebar_details_component_via_turbo_stream
+      if section.backlog?
+        update_backlog_via_turbo_stream(collapsed: false)
+      end
     else
       generic_call_failure_response(call)
     end
@@ -159,7 +170,7 @@ class MeetingAgendaItemsController < ApplicationController
     respond_with_turbo_streams
   end
 
-  def drop
+  def drop # rubocop:disable Metrics/AbcSize
     call = ::MeetingAgendaItems::DropService.new(
       user: current_user, meeting_agenda_item: @meeting_agenda_item
     ).call(
@@ -172,7 +183,7 @@ class MeetingAgendaItemsController < ApplicationController
         move_item_to_other_section_via_turbo_stream(
           old_section: call.result[:old_section],
           current_section: call.result[:current_section],
-          collapsed: params[:collapsed]
+          collapsed: ActiveModel::Type::Boolean.new.cast(params[:collapsed])
         )
       else
         move_item_within_section_via_turbo_stream

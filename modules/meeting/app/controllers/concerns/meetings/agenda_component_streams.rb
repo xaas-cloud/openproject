@@ -142,12 +142,13 @@ module Meetings
         )
       end
 
-      def render_agenda_item_form_via_turbo_stream(meeting: @meeting, meeting_section: @meeting_section, type: :simple)
+      def render_agenda_item_form_via_turbo_stream(collapsed:, meeting: @meeting, meeting_section: @meeting_section,
+                                                   type: :simple)
         if meeting.sections.empty? &&
           (!OpenProject::FeatureDecisions.meeting_backlogs_active? || meeting_section != meeting.backlog)
           render_agenda_item_form_for_empty_meeting_via_turbo_stream(type:)
         else
-          render_agenda_item_form_in_section_via_turbo_stream(meeting:, meeting_section:, type:)
+          render_agenda_item_form_in_section_via_turbo_stream(meeting:, meeting_section:, type:, collapsed:)
         end
 
         update_new_button_via_turbo_stream(disabled: true)
@@ -161,13 +162,13 @@ module Meetings
         )
       end
 
-      def render_agenda_item_form_in_section_via_turbo_stream(meeting: @meeting, meeting_section: @meeting_section, type: :simple)
+      def render_agenda_item_form_in_section_via_turbo_stream(collapsed:, meeting: @meeting, meeting_section: @meeting_section,
+                                                              type: :simple)
         if meeting_section.nil?
           meeting_section = meeting.sections.last
         end
-
         if meeting_section.agenda_items.empty?
-          update_section_via_turbo_stream(meeting_section:, form_hidden: false, form_type: type)
+          update_section_via_turbo_stream(meeting_section:, form_hidden: false, form_type: type, collapsed:)
         else
           update_new_component_via_turbo_stream(
             hidden: false,
@@ -353,6 +354,8 @@ module Meetings
       end
 
       def update_section_header_via_turbo_stream(meeting_section: @meeting_section, state: :show)
+        return if meeting_section.backlog?
+
         update_via_turbo_stream(
           component: MeetingSections::HeaderComponent.new(
             meeting_section:,
@@ -373,14 +376,15 @@ module Meetings
       end
 
       def update_section_via_turbo_stream(meeting_section: @meeting_section, form_hidden: true, form_type: :simple,
-                                          force_wrapper: false, state: :show)
+                                          force_wrapper: false, state: :show, collapsed: nil)
         update_via_turbo_stream(
           component: MeetingSections::ShowComponent.new(
             meeting_section:,
             form_type:,
             form_hidden:,
             force_wrapper:,
-            state:
+            state:,
+            collapsed:
           )
         )
       end

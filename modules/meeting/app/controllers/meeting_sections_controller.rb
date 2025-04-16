@@ -182,7 +182,7 @@ class MeetingSectionsController < ApplicationController
       errors << call.errors unless call.success?
     end
 
-    update_backlog_via_turbo_stream(collapsed: true.to_s)
+    update_backlog_via_turbo_stream(collapsed: true)
     render_error_flash_message_via_turbo_stream(message: t("text_backlog_clear_error")) if errors.any?
 
     respond_with_turbo_streams

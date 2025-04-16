@@ -36,11 +36,12 @@ module MeetingSections
 
     def initialize(backlog:, collapsed:, box: nil)
       super
+
       @backlog = backlog
       @meeting = backlog.meeting
       @box = box
-      @collapsed = collapsed == "true" unless collapsed.nil?
-      @collapsed = default if @collapsed.nil?
+
+      @collapsed = collapsed.nil? ? default : collapsed
     end
 
     private
